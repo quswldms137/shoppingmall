@@ -21,4 +21,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>{
 	//판매등록일 순
 	@Query(value="SELECT * FROM product ORDER BY saleregdate DESC LIMIT 4", nativeQuery = true)
 	List<Product> findBySaleregdate();
+
+	Product findByPname(String pname);
 }

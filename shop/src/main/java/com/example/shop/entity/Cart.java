@@ -22,9 +22,9 @@ public class Cart {
 	private Long cno;
 	
 	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "pname")
+	@JoinColumn(name = "pno")
 	@ToString.Exclude
-	private Product pname; //상품 이름 
+	private Product pno; //상품 번호
 	
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "username")

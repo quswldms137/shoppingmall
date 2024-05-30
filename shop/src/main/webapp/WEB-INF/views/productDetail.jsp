@@ -65,7 +65,8 @@ h2{padding:10px;}
 		</div>
 		<div class="btn">
 			<a href="orderDo"><button>주문하기</button></a>
-			<a href="cartDo"><button>장바구니담기</button></a>
+			<a href="cartDo?pno=${product.pno }&pname=${product.pname}"><button>장바구니담기</button></a>
+			<a href="cartList"><button>장바구니 가기</button></a>
 		</div>
 	</div>
 </div>

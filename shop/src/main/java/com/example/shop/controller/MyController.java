@@ -8,10 +8,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 
+import com.example.shop.dto.CartDto;
+import com.example.shop.entity.Cart;
 import com.example.shop.entity.Member;
 import com.example.shop.entity.Product;
+import com.example.shop.repository.CartRepository;
 import com.example.shop.repository.MemberRepository;
 import com.example.shop.repository.ProductRepository;
 
@@ -24,6 +26,9 @@ public class MyController {
 	MemberRepository memberRepository;
 	@Autowired
 	ProductRepository productRepository;
+	@Autowired
+	CartRepository cartRepository;
+	
 	//메인 
 	@RequestMapping({"/", "/main"})
 	public String main(Model model) {
@@ -173,9 +178,38 @@ public class MyController {
 		productRepository.deleteByPno(pno);
 		return "redirect:mypage";
 	}
-	//장바구니
-	@RequestMapping("/cartDo")
-	public String cart() {
-		return "cartDo";
+	
+	//장바구니 페이지
+	@RequestMapping("/cartList")
+	public String cartList(Model model) {
+		List<CartDto> cart = cartRepository.findAllWithCart();
+		model.addAttribute("cart", cart);
+		return "cartList";
 	}
+	//장바구니 저장 
+	@RequestMapping("/cartDo")
+	public String cart(HttpServletRequest req, @RequestParam("pno") Long pno) {
+		HttpSession session = req.getSession();
+		String username = (String)session.getAttribute("username");
+		
+		//Product product = new Product();
+		//product.setPno(pno);
+		//product.setPname(pname);
+		
+		Product product = productRepository.findByPno(pno);
+		System.out.println(product+"=================================");
+		Member member = memberRepository.findByUsername(username);
+		System.out.println(member+"=================================");
+		Cart cart = new Cart();
+		
+		cart.setPno(product);
+		cart.setUsername(member); 
+		
+		cartRepository.save(cart);
+		
+		return "redirect:cartList";
+	}
+	
+	
+	
 }
