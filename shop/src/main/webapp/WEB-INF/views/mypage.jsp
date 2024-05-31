@@ -14,11 +14,18 @@ align-items: center;
 flex-direction: column; 
 }
 h2{padding:10px;}
-td {
+table{
+	border-collapse : collapse;
+	margin-top:7px;
+}
+th, td {
 padding: 15px; /* 셀 내부 패딩 설정 */
 text-align: center; /* 텍스트 가운데 정렬 */
 }
-
+#p-btn{
+	padding:5px;
+	border: 1px solid black;
+}
 </style>
 </head>
 <body>
@@ -30,7 +37,7 @@ text-align: center; /* 텍스트 가운데 정렬 */
 <h2>관리자페이지</h2>
 <br>
 <div class="container">
-<a href="productRegistForm">상품등록</a>
+<a id="p-btn" href="productRegistForm">상품등록</a>
 <table border="1">
 	<tr>
 		<th>품번</th>

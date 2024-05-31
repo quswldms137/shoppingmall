@@ -10,11 +10,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.shop.dto.CartDto;
+import com.example.shop.dto.OrderProductDto;
 import com.example.shop.entity.Cart;
 import com.example.shop.entity.Member;
+import com.example.shop.entity.OrderProduct;
 import com.example.shop.entity.Product;
 import com.example.shop.repository.CartRepository;
 import com.example.shop.repository.MemberRepository;
+import com.example.shop.repository.OrderProductRepository;
 import com.example.shop.repository.ProductRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +31,8 @@ public class MyController {
 	ProductRepository productRepository;
 	@Autowired
 	CartRepository cartRepository;
+	@Autowired
+	OrderProductRepository orderProductRepository;
 	
 	//메인 
 	@RequestMapping({"/", "/main"})
@@ -111,8 +116,9 @@ public class MyController {
 			model.addAttribute("product", product);
 			return "mypage";
 		}else {
-	        return "main";
-	    }
+			return "main";
+		}
+		
 	}
 	// -- 상품 등록 
 	@RequestMapping("/productRegistForm")
@@ -181,8 +187,12 @@ public class MyController {
 	
 	//장바구니 페이지
 	@RequestMapping("/cartList")
-	public String cartList(Model model) {
-		List<CartDto> cart = cartRepository.findAllWithCart();
+	public String cartList(Model model, HttpSession session) {
+		String username = (String) session.getAttribute("username");
+		 if (username == null) {
+	            return "redirect:loginForm"; 
+	     }
+		List<CartDto> cart = cartRepository.findByUsername(username);
 		model.addAttribute("cart", cart);
 		return "cartList";
 	}
@@ -197,19 +207,71 @@ public class MyController {
 		//product.setPname(pname);
 		
 		Product product = productRepository.findByPno(pno);
-		System.out.println(product+"=================================");
 		Member member = memberRepository.findByUsername(username);
-		System.out.println(member+"=================================");
 		Cart cart = new Cart();
 		
 		cart.setPno(product);
 		cart.setUsername(member); 
+		cart.setQuantity(1);
+		cartRepository.save(cart);
 		
+		return "redirect:cartList";
+	}
+	//장바구니 삭제
+	@RequestMapping("/cartDelete")
+	public String cartDelete(@RequestParam("cno") Long cno) {
+		cartRepository.deleteByCno(cno);
+		return "redirect:cartList";
+	}
+	
+	//장바구니 수량 저장
+	@RequestMapping("/cartSave")
+	public String cartSave(HttpServletRequest req) {
+		Long cno = Long.parseLong(req.getParameter("cno"));
+		int quantity = Integer.parseInt(req.getParameter("quantity"));
+		
+		Cart cart = cartRepository.findByCno(cno);
+		cart.setQuantity(quantity);
 		cartRepository.save(cart);
 		
 		return "redirect:cartList";
 	}
 	
+	//주문저장
+	@RequestMapping("/orderDo")
+	public String orderDo(HttpServletRequest req, @RequestParam("pno") Long pno) {
+		HttpSession session = req.getSession();
+		String username = (String) session.getAttribute("username");
+		
+		Product product = productRepository.findByPno(pno);
+		System.out.println(product);
+		Member member = memberRepository.findByUsername(username);
+		System.out.println(member);
+		
+		OrderProduct op = new OrderProduct();
+		op.setPno(product);
+		op.setUsername(member);
+		op.setOrderquantity(1);
+		System.out.println(op+"============================주문저장");
+		orderProductRepository.save(op);
+		
+		return "redirect:orderList";
+	}
 	
-	
+	//주문리스트 페이지
+	@RequestMapping("/orderList")
+	public String orderList(HttpServletRequest req, Model model) {
+		HttpSession session = req.getSession();
+		String username = (String)session.getAttribute("username");
+			
+		if (username == null) {
+			return "redirect:loginForm"; 
+		}
+			 
+		List<OrderProductDto> order = orderProductRepository.findOrderByUsername(username);
+		System.out.println(order+"+++++++++++++++++++++++++++주문리스트");
+		model.addAttribute("order", order);
+			
+		return "orderList";
+	}
 }
